@@ -29,6 +29,22 @@ SIZE_UNITS = [
     "PB"
 ]
 
+# --- CUSTOM EMOJIS ---
+EM_1 = '<tg-emoji emoji-id="5877219383691972108">➕</tg-emoji>'
+EM_2 = '<tg-emoji emoji-id="5195111279244619776">🍀</tg-emoji>'
+EM_3 = '<tg-emoji emoji-id="5287533898803211359">📫</tg-emoji>'
+EM_4 = '<tg-emoji emoji-id="5411590687663608498">⚡</tg-emoji>'
+EM_5 = '<tg-emoji emoji-id="5422407403884798028">🍀</tg-emoji>'
+EM_6 = '<tg-emoji emoji-id="5424867354993513047">🌷</tg-emoji>'
+EM_7 = '<tg-emoji emoji-id="5443127283898405358">⬇️</tg-emoji>'
+EM_8 = '<tg-emoji emoji-id="5445355530111437729">⬆️</tg-emoji>'
+EM_9 = '<tg-emoji emoji-id="5765005318610228026">❌</tg-emoji>'
+EM_10 = '<tg-emoji emoji-id="5285439518130857782">❤️</tg-emoji>'
+EM_11 = '<tg-emoji emoji-id="5190642636356072894">☔️</tg-emoji>'
+EM_12 = '<tg-emoji emoji-id="5256218768262056531">🟪</tg-emoji>'
+EM_13 = '<tg-emoji emoji-id="5285535716808342592">☠️</tg-emoji>'
+# ---------------------
+
 
 class MirrorStatus:
     STATUS_UPLOADING = "Upload 📤"
@@ -190,10 +206,13 @@ def get_progress_bar_string(pct):
         max(pct, 0),
         100
     )
-    cFull = int(p // 10)
-    p_str = "█" * cFull
-    p_str += "▒" * (10 - cFull)
-    return f"{p_str}"
+    cFull = int(p // 8)
+    PRG_FULL = '<tg-emoji emoji-id="5422682311856501431">🌷</tg-emoji>'
+    PRG_EMPTY = '<tg-emoji emoji-id="5971816626796892111">🔹</tg-emoji>'
+    
+    p_str = PRG_FULL * cFull
+    p_str += PRG_EMPTY * (12 - cFull)
+    return f"[{p_str}]"
 
 
 async def get_readable_message(
@@ -253,14 +272,14 @@ async def get_readable_message(
         ):
             msg += (
                 f"<b><i>\n#Zee{index + start_position}: "
-                f"{escape(f"{task.name()}")}\n</i></b>"
+                f"{escape(f'{task.name()}')}\n</i></b>"
                 if elapse <= config_dict["AUTO_DELETE_MESSAGE_DURATION"]
                 else f"\n<b>#Zee{index + start_position}...(Processing)</b>"
             )
         else:
             msg += (
                 f"<b><i>\n#Zee{index + start_position}: "
-                f"{escape(f"{task.name()}")}\n</i></b>"
+                f"{escape(f'{task.name()}')}\n</i></b>"
             )
         if tstatus not in [
             MirrorStatus.STATUS_SEEDING,
@@ -274,16 +293,16 @@ async def get_readable_message(
                 else task.progress()
             )
             msg += (
-                f"\n{get_progress_bar_string(progress)} » <b><i>{progress}</i></b>"
-                f"\n<code>Status :</code> <b>{tstatus}</b>"
-                f"\n<code>Done   :</code> {task.processed_bytes()} of {task.size()}"
-                f"\n<code>Speed  :</code> {task.speed()}"
-                f"\n<code>ETA    :</code> {task.eta()}"
-                f"\n<code>Past   :</code> {elapsed}"
-                f"\n<code>User   :</code> <b>{user_tag}</b>"
-                f"\n<code>UserID :</code> ||{task.listener.user_id}||"
-                f"\n<code>Upload :</code> {task.listener.mode}"
-                f"\n<code>Engine :</code> <b><i>{task.engine}</i></b>"
+                f"\n{EM_1} {get_progress_bar_string(progress)} <b><i>{progress}</i></b>"
+                f"\n{EM_3} <b>Status</b> → <b>{tstatus}</b>"
+                f"\n{EM_2} <b>Done</b> → <i>{task.processed_bytes()} of {task.size()}</i>"
+                f"\n{EM_4} <b>Speed</b> → <i>{task.speed()}</i>"
+                f"\n{EM_5} <b>ETA</b> → <i>{task.eta()}</i>"
+                f"\n{EM_5} <b>Past</b> → <i>{elapsed}</i>"
+                f"\n👤 <b>User</b> → <b>{user_tag}</b>"
+                f"\n🆔 <b>UserID</b> → ||{task.listener.user_id}||"
+                f"\n{EM_7} <b>Upload</b> → <i>{task.listener.mode}</i>"
+                f"\n{EM_13} <b>Engine</b> → <b><i>{task.engine}</i></b>"
             )
             if hasattr(
                 task,
@@ -299,28 +318,28 @@ async def get_readable_message(
                 "seeders_num"
             ):
                 try:
-                    msg += f"\n<code>S/L    :</code> {task.seeders_num()}/{task.leechers_num()}"
+                    msg += f"\n{EM_2} <b>S/L</b> → <i>{task.seeders_num()}/{task.leechers_num()}</i>"
                 except:
                     pass
         elif tstatus == MirrorStatus.STATUS_SEEDING:
             msg += (
-                f"\n<code>Size   : </code>{task.size()}"
-                f"\n<code>Speed  : </code>{task.seed_speed()}"
-                f"\n<code>Upload : </code>{task.uploaded_bytes()}"
-                f"\n<code>Ratio  : </code>{task.ratio()}"
-                f"\n<code>Time   : </code>{task.seeding_time()}"
+                f"\n{EM_6} <b>Size</b> → <i>{task.size()}</i> | <b>Uploaded</b> → <i>{task.uploaded_bytes()}</i>"
+                f"\n{EM_3} <b>Status</b> → <b>{tstatus}</b>"
+                f"\n{EM_4} <b>Speed</b> → <i>{task.seed_speed()}</i>"
+                f"\n{EM_1} <b>Ratio</b> → <i>{task.ratio()}</i>"
+                f"\n{EM_5} <b>Time</b> → <i>{task.seeding_time()}</i> | <b>Elapsed</b> → <i>{elapsed}</i>"
             )
         else:
             msg += (
-                f"\n<code>Status :</code> <b>{tstatus}</b>"
-                f"\n<code>Size   :</code> {task.size()}"
-                f"\n<code>Upload :</code> {task.listener.mode}"
-                f"\n<code>Past   :</code> {elapsed}"
-                f"\n<code>User   :</code> {user_tag}"
-                f"\n<code>UserID :</code> ||{task.listener.user_id}||"
-                f"\n<code>Engine :</code> {task.engine}"
+                f"\n{EM_3} <b>Status</b> → <b>{tstatus}</b>"
+                f"\n{EM_6} <b>Size</b> → <i>{task.size()}</i>"
+                f"\n{EM_7} <b>Upload</b> → <i>{task.listener.mode}</i>"
+                f"\n{EM_5} <b>Past</b> → <i>{elapsed}</i>"
+                f"\n👤 <b>User</b> → <i>{user_tag}</i>"
+                f"\n🆔 <b>UserID</b> → ||{task.listener.user_id}||"
+                f"\n{EM_13} <b>Engine</b> → <i>{task.engine}</i>"
             )
-        msg += f"\n⚠️ {cancel_task}\n\n"
+        msg += f"\n{EM_9} {cancel_task}\n\n"
 
     if len(msg) == 0:
         if status == "All":
@@ -394,11 +413,11 @@ async def get_readable_message(
                 )
     button = buttons.build_menu(8)
     msg += (
-        "▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬\n"
-        f"<b>CPU</b>: {cpu_percent()}% | "
-        f"<b>FREE</b>: {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)}\n"
-        f"<b>RAM</b>: {virtual_memory().percent}% | "
-        f"<b>UPTM</b>: {get_readable_time(time() - bot_start_time)}"
+        f"\n{EM_12} <b><u>Bot Stats</u></b>\n"
+        f"{EM_10} <b>CPU</b> → {cpu_percent()}% | "
+        f"<b>FREE</b> → {get_readable_file_size(disk_usage(DOWNLOAD_DIR).free)} [{round(100 - disk_usage(DOWNLOAD_DIR).percent, 1)}%]\n"
+        f"{EM_11} <b>RAM</b> → {virtual_memory().percent}% | "
+        f"<b>UPTM</b> → {get_readable_time(time() - bot_start_time)}"
     )
     return (
         msg,
