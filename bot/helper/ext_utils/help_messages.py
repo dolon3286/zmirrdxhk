@@ -341,7 +341,7 @@ YT_HELP_DICT = {
 MIRROR_HELP_DICT = {
     "main": mirror,
     "ʀᴇɴᴀᴍᴇ\nꜰɪʟᴇ": new_name,
-    "ᴅᴏᴡɴʟᴏᴀᴅ\nᴀᴜᴛʜ": "<b>Direct link authorization</b>: -au -ap\n\n/cmd link -au username -ap password",
+    "<b>ᴅᴏᴡɴʟᴏᴀᴅ\nᴀᴜᴛʜ</b>": "<b>Direct link authorization</b>: -au -ap\n\n/cmd link -au username -ap password",
     "ᴅᴅʟ\nʜᴇᴀᴅᴇʀꜱ": "<b>Direct link custom headers</b>: -h\n\n/cmd link -h key: value key1: value1",
     "ᴇxᴛʀᴀᴄᴛ\nᴢɪᴘ": extract_zip,
     "ꜱᴇʟᴇᴄᴛ\nꜰɪʟᴇꜱ": "<b>Bittorrent/JDownloader/Sabnzbd File Selection</b>: -s\n\n/cmd link -s or by replying to file/link",
@@ -407,3 +407,189 @@ PASSWORD_ERROR_MESSAGE = """
 
 <b>Example:</b> link::my password
 """
+
+
+def get_bot_commands():
+    from ...core.plugin_manager import get_plugin_manager
+
+    static_commands = {
+        "Mirror": "[link/file] Mirror to Upload Destination",
+        "QbMirror": "[magnet/torrent] Mirror to Upload Destination using qbit",
+        "Ytdl": "[link] Mirror YouTube, m3u8, Social Media and yt-dlp supported urls",
+        "UpHoster": "[link/file] Upload to DDL Servers",
+        "Leech": "[link/file] Leech files to Upload to Telegram",
+        "QbLeech": "[magnet/torrent] Leech files to Upload to Telegram using qbit",
+        "YtdlLeech": "[link] Leech YouTube, m3u8, Social Media and yt-dlp supported urls",
+        "Clone": "[link] Clone files/folders to GDrive",
+        "UserSet": "User personal settings",
+        "ForceStart": "[gid/reply] Force start from queued task",
+        "Count": "[link] Count no. of files/folders in GDrive",
+        "List": "[query] Search any Text which is available in GDrive",
+        "Search": "[query] Search torrents via Qbit Plugins",
+        "MediaInfo": "[reply/link] Get MediaInfo of the Target Media",
+        "Select": "[gid/reply] Select files for NZB, Aria2, Qbit Tasks",
+        "Ping": "Ping Bot to test Response Speed",
+        "SpeedTest": "Check Bot Speed using Speedtest.net",
+        "Status": "[id/me] Tasks Status of Bot",
+        "Stats": "Bot, OS, Repo & System full Statistics",
+        "Rss": "User RSS Management Settings",
+        "IMDB": "[query] or ttxxxxxx Get IMDB info",
+        "CancelAll": "Cancel all Tasks on the Bot",
+        "Help": "Detailed help usage of the WZ Bot",
+        "BotSet": "[SUDO] Bot Management Settings",
+        "Log": "[SUDO] Get Bot Logs for Internal Working",
+        "Restart": "[SUDO] Reboot bot",
+        "RestartSessions": "[SUDO] Reboot User Sessions",
+        "GenPyroSess": "[SUDO] Generate Pyrogram String Session",
+    }
+
+    commands = static_commands.copy()
+
+    plugin_manager = get_plugin_manager()
+    if plugin_manager:
+        for plugin_info in plugin_manager.list_plugins():
+            if plugin_info.enabled and plugin_info.commands:
+                for cmd in plugin_info.commands:
+                    if cmd == "speedtest":
+                        commands["SpeedTest"] = "Check Bot Speed using Speedtest.net"
+
+    return commands
+
+
+BOT_COMMANDS = get_bot_commands()
+
+
+def get_help_string():
+    from ..telegram_helper.bot_commands import BotCommands
+
+    help_lines = ["NOTE: Try each command without any argument to see more detalis."]
+
+    commands = BotCommands.get_commands()
+
+    for key, cmds in commands.items():
+        cmd_attr = getattr(BotCommands, f"{key}Command", None)
+        if not cmd_attr:
+            continue
+
+        if isinstance(cmd_attr, list):
+            cmd_str = f"/{' or /'.join(cmd_attr)}"
+        else:
+            cmd_str = f"/{cmd_attr}"
+
+        if key == "SpeedTest" and key in BOT_COMMANDS:
+            help_lines.append(f"{cmd_str}: Check Bot Speed using Speedtest.net")
+        elif key == "Mirror":
+            help_lines.append(f"{cmd_str}: Start mirroring to cloud.")
+        elif key == "QbMirror":
+            help_lines.append(f"{cmd_str}: Start Mirroring to cloud using qBittorrent.")
+        elif key == "JdMirror":
+            help_lines.append(f"{cmd_str}: Start Mirroring to cloud using JDownloader.")
+        elif key == "NzbMirror":
+            help_lines.append(f"{cmd_str}: Start Mirroring to cloud using Sabnzbd.")
+        elif key == "Ytdl":
+            help_lines.append(f"{cmd_str}: Mirror yt-dlp supported link.")
+        elif key == "UpHoster":
+            help_lines.append(f"{cmd_str}: Upload to DDL Servers.")
+        elif key == "Leech":
+            help_lines.append(f"{cmd_str}: Start leeching to Telegram.")
+        elif key == "QbLeech":
+            help_lines.append(f"{cmd_str}: Start leeching using qBittorrent.")
+        elif key == "JdLeech":
+            help_lines.append(f"{cmd_str}: Start leeching using JDownloader.")
+        elif key == "NzbLeech":
+            help_lines.append(f"{cmd_str}: Start leeching using Sabnzbd.")
+        elif key == "YtdlLeech":
+            help_lines.append(f"{cmd_str}: Leech yt-dlp supported link.")
+        elif key == "Clone":
+            help_lines.append(
+                f"{cmd_str} [drive_url]: Copy file/folder to Google Drive."
+            )
+        elif key == "Count":
+            help_lines.append(
+                f"{cmd_str} [drive_url]: Count file/folder of Google Drive."
+            )
+        elif key == "Delete":
+            help_lines.append(
+                f"{cmd_str} [drive_url]: Delete file/folder from Google Drive (Only Owner & Sudo)."
+            )
+        elif key == "UserSet":
+            help_lines.append(f"{cmd_str} [query]: Users settings.")
+        elif key == "BotSet":
+            help_lines.append(f"{cmd_str} [query]: Bot settings.")
+        elif key == "Select":
+            help_lines.append(
+                f"{cmd_str}: Select files from torrents or nzb by gid or reply."
+            )
+        elif key == "CancelTask":
+            help_lines.append(f"{cmd_str} [gid]: Cancel task by gid or reply.")
+        elif key == "ForceStart":
+            help_lines.append(f"{cmd_str} [gid]: Force start task by gid or reply.")
+        elif key == "CancelAll":
+            help_lines.append(f"{cmd_str} [query]: Cancel all [status] tasks.")
+        elif key == "List":
+            help_lines.append(f"{cmd_str} [query]: Search in Google Drive(s).")
+        elif key == "Search":
+            help_lines.append(f"{cmd_str} [query]: Search for torrents with API.")
+        elif key == "MediaInfo":
+            help_lines.append(f"{cmd_str} [query]: Get media info.")
+        elif key == "Status":
+            help_lines.append(f"{cmd_str}: Shows a status of all the downloads.")
+        elif key == "Stats":
+            help_lines.append(
+                f"{cmd_str}: Show stats of the machine where the bot is hosted in."
+            )
+        elif key == "Ping":
+            help_lines.append(
+                f"{cmd_str}: Check how long it takes to Ping the Bot (Only Owner & Sudo)."
+            )
+        elif key == "Authorize":
+            help_lines.append(
+                f"{cmd_str}: Authorize a chat or a user to use the bot (Only Owner & Sudo)."
+            )
+        elif key == "UnAuthorize":
+            help_lines.append(
+                f"{cmd_str}: Unauthorize a chat or a user to use the bot (Only Owner & Sudo)."
+            )
+        elif key == "Users":
+            help_lines.append(f"{cmd_str}: show users settings (Only Owner & Sudo).")
+        elif key == "AddSudo":
+            help_lines.append(f"{cmd_str}: Add sudo user (Only Owner).")
+        elif key == "RmSudo":
+            help_lines.append(f"{cmd_str}: Remove sudo users (Only Owner).")
+        elif key == "BlackList":
+            help_lines.append(f"{cmd_str}: Blacklist a user from using the bot (Only Owner & Sudo).")
+        elif key == "RmBlackList":
+            help_lines.append(f"{cmd_str}: Remove a user from blacklist (Only Owner & Sudo).")
+        elif key == "AddImage":
+            help_lines.append(f"{cmd_str}: Add an image to the gallery by reply to photo or link.")
+        elif key == "Images":
+            help_lines.append(f"{cmd_str}: View and manage the image gallery.")
+        elif key == "Restart":
+            help_lines.append(
+                f"{cmd_str}: Restart and update the bot (Only Owner & Sudo)."
+            )
+        elif key == "Log":
+            help_lines.append(
+                f"{cmd_str}: Get a log file of the bot. Handy for getting crash reports (Only Owner & Sudo)."
+            )
+        elif key == "Shell":
+            help_lines.append(f"{cmd_str}: Run shell commands (Only Owner).")
+        elif key == "AExec":
+            help_lines.append(f"{cmd_str}: Exec async functions (Only Owner).")
+        elif key == "Exec":
+            help_lines.append(f"{cmd_str}: Exec sync functions (Only Owner).")
+        elif key == "ClearLocals":
+            help_lines.append(
+                f"/{BotCommands.ClearLocalsCommand}: Clear {BotCommands.AExecCommand} or {BotCommands.ExecCommand} locals (Only Owner)."
+            )
+        elif key == "Rss":
+            help_lines.append(f"/{BotCommands.RssCommand}: RSS Menu.")
+        elif key == "GenPyroSess":
+            help_lines.append(
+                f"/{BotCommands.GenPyroSessCommand}: Generate Pyrogram String Session (Only Owner & Sudo)."
+            )
+
+    return "\n".join(help_lines)
+
+
+help_string = get_help_string()
