@@ -29,6 +29,9 @@ from tenacity import (
     RetryError,
 )
 from time import time
+import shutil
+import os
+import random
 
 from nekozee.errors import (
     FloodWait,
@@ -86,6 +89,7 @@ class TelegramUploader:
         self._is_private = False
         self._sent_msg = None
         self._sent_DMmsg = None
+        self._log_msg = None
         self._user_session = self._listener.user_transmission
 
     async def _upload_progress(self, current, _):
@@ -126,6 +130,7 @@ class TelegramUploader:
         if DUMP_CHAT_ID := config_dict["DUMP_CHAT_ID"]:
             if self._listener.log_message:
                 self._sent_msg = await self._listener.log_message.copy(DUMP_CHAT_ID)
+                self._log_msg = self._sent_msg
             else:
                 msg = f"<b>File Name</b>: <code>{escape(self._listener.name)}</code>\n\n"
                 msg += f"<b>#Leech_Started!</b>\n"
@@ -136,6 +141,7 @@ class TelegramUploader:
                     msg,
                     disable_web_page_preview=True
                 )
+                self._log_msg = self._sent_msg
             if self._listener.dm_message:
                 self._sent_DMmsg = self._listener.dm_message
             if IS_PREMIUM_USER:
@@ -445,6 +451,47 @@ class TelegramUploader:
         res = await self._msg_to_reply()
         if not res:
             return
+
+        # --- START: AUTO-ZIP IMAGES ---
+        # Only run this if the download is a folder (not a single file)
+        if ospath.isdir(self._path):
+            img_exts = ['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.gif', '.tif', '.tiff']
+            pack_name = "Images_Pack"
+            pack_path = ospath.join(self._path, pack_name)
+            has_images = False
+
+            # Walk through the folder to find images
+            for root, dirs, files in os.walk(self._path):
+                if pack_name in root: continue # Don't scan the folder we are creating
+                
+                for file in files:
+                    ext = ospath.splitext(file)[1].lower()
+                    if ext in img_exts:
+                        if not ospath.exists(pack_path):
+                            os.makedirs(pack_path)
+                        
+                        file_path = ospath.join(root, file)
+                        target_file = ospath.join(pack_path, file)
+                        
+                        # Handle duplicate filenames
+                        if ospath.exists(target_file):
+                            base, extension = ospath.splitext(file)
+                            target_file = ospath.join(pack_path, f"{base}_{random.randint(1,999)}{extension}")
+                            
+                        try:
+                            shutil.move(file_path, target_file)
+                            has_images = True
+                        except Exception as e:
+                            LOGGER.error(f"Failed to move image: {e}")
+
+            # If images were found, Zip them and delete the raw folder
+            if has_images:
+                LOGGER.info(f"Found images! Zipping them into {pack_name}.zip to avoid flood limit.")
+                shutil.make_archive(pack_path, 'zip', pack_path)
+                shutil.rmtree(pack_path)
+        # --- END: AUTO-ZIP IMAGES ---
+
+        is_log_del = False
         for (
             dirpath,
             _,
@@ -545,11 +592,17 @@ class TelegramUploader:
                             )
                     self._last_msg_in_group = False
                     self._last_uploaded = 0
+                    
                     await self._upload_file(
                         cap_mono,
                         file_,
                         f_path
                     )
+                    
+                    if self._log_msg and not is_log_del and config_dict.get("CLEAN_LOG_MSG"):
+                        await delete_message(self._log_msg)
+                        is_log_del = True
+
                     if self._listener.is_cancelled:
                         return
                     if (
@@ -833,23 +886,23 @@ class TelegramUploader:
                         )
                     else:
                         self._last_msg_in_group = True
-                elif (
-                    not self._listener.is_cancelled
-                    and self._sent_DMmsg
-                ):
-                    await self._send_dm()
             elif (
                 not self._listener.is_cancelled
                 and self._sent_DMmsg
             ):
                 await self._send_dm()
+        elif (
+            not self._listener.is_cancelled
+            and self._sent_DMmsg
+        ):
+            await self._send_dm()
 
-            if (
-                self._thumb is None
-                and thumb is not None
-                and await aiopath.exists(thumb)
-            ):
-                await remove(thumb)
+        if (
+            self._thumb is None
+            and thumb is not None
+            and await aiopath.exists(thumb)
+        ):
+            await remove(thumb)
         except FloodWait as f:
             LOGGER.warning(str(f))
             await sleep(f.value * 1.3) # type: ignore
