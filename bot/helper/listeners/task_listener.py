@@ -65,6 +65,26 @@ from ..telegram_helper.message_utils import (
     update_status_message,
 )
 
+# --- CUSTOM EMOJIS FROM MY REPO ---
+EM_1 = '<tg-emoji emoji-id="5877219383691972108">➕</tg-emoji>'
+EM_2 = '<tg-emoji emoji-id="5195111279244619776">🍀</tg-emoji>'
+EM_3 = '<tg-emoji emoji-id="5287533898803211359">📫</tg-emoji>'
+EM_4 = '<tg-emoji emoji-id="5411590687663608498">⚡</tg-emoji>'
+EM_5 = '<tg-emoji emoji-id="5422407403884798028">🍀</tg-emoji>'
+EM_6 = '<tg-emoji emoji-id="5424867354993513047">🌷</tg-emoji>'
+EM_7 = '<tg-emoji emoji-id="5443127283898405358">⬇️</tg-emoji>'
+EM_8 = '<tg-emoji emoji-id="5445355530111437729">⬆️</tg-emoji>'
+EM_9 = '<tg-emoji emoji-id="5765005318610228026">❌</tg-emoji>'
+EM_10 = '<tg-emoji emoji-id="5285439518130857782">❤️</tg-emoji>'
+EM_11 = '<tg-emoji emoji-id="5377535110289576661">🧲</tg-emoji>'
+EM_12 = '<tg-emoji emoji-id="5357157569234216891">➕</tg-emoji>'
+EM_13 = '<tg-emoji emoji-id="5325547803936572038">✨</tg-emoji>'
+EM_14 = '<tg-emoji emoji-id="5363853285809735292">🍿</tg-emoji>'
+EM_15 = '<tg-emoji emoji-id="5424867354993513047">🌷</tg-emoji>'
+EM_16 = '<tg-emoji emoji-id="5444856076954520455">🧾</tg-emoji>'
+EM_17 = '<tg-emoji emoji-id="5224450179368767019">🌎</tg-emoji>'
+# ----------------------------------
+
 
 class TaskListener(TaskConfig):
     def __init__(self):
@@ -441,26 +461,26 @@ class TaskListener(TaskConfig):
             await database.rm_complete_task(self.message.link) # type: ignore
         LOGGER.info(f"Task Done: {self.name}")
         lmsg = (
-            f"<b><i>{escape(self.name)}</i></b>"
-            f"\n<b>cc</b>: <i>{self.tag}</i>"
+            f"<b><i>{escape(self.name)}</i></b>\n{EM_13}"
+            f"\n{EM_16} <b>cc</b>: <i>{self.tag}</i>"
         )
-        gmsg = f"\n<b>Hey {self.tag}!\nYour job is done.</b>"
+        gmsg = f"\n{EM_10} <b>Hey {self.tag}!\nYour job is done.</b>"
         msg = (
-            f"\n\n<code>Size  </code>: {get_readable_file_size(self.size)}"
-            f"\n<code>Past  </code>: {get_readable_time(time() - self.time)}"
-            f"\n<code>Mode  </code>: {self.mode}"
+            f"\n\n{EM_2} <code>Size  </code>: {get_readable_file_size(self.size)}"
+            f"\n{EM_4} <code>Past  </code>: {get_readable_time(time() - self.time)}"
+            f"\n{EM_17} <code>Mode  </code>: {self.mode}"
         )
         _msg = (
             ""
             if rclonePath == ""
-            else f"\n\n<code>Path  </code>: {rclonePath}"
+            else f"\n\n{EM_6} <code>Path  </code>: {rclonePath}"
         )
-        msg_ = "\n\n<b><i>Link has been sent in your DM.</b></i>"
+        msg_ = f"\n\n{EM_3} <b><i>Link has been sent in your DM.</b></i>"
         if self.is_leech:
-            msg += f"\n<code>Files </code>: {folders}\n"
+            msg += f"\n{EM_15} <code>Files </code>: {folders}\n"
             if mime_type != 0:
-                msg += f"<code>Error </code>: {mime_type}\n"
-            msg_ = "\n<b><i>Files has been sent in your DM.</b></i>"
+                msg += f"{EM_9} <code>Error </code>: {mime_type}\n"
+            msg_ = f"\n{EM_3} <b><i>Files has been sent in your DM.</b></i>"
             if not self.dm_message:
                 if not files:
                     await send_message(
@@ -557,10 +577,10 @@ class TaskListener(TaskConfig):
                             gmsg + msg + msg_
                         )
         else:
-            msg += f"\n<code>Type  </code>: {mime_type}"
+            msg += f"\n{EM_14} <code>Type  </code>: {mime_type}"
             if mime_type == "Folder":
-                msg += f"\n<code>Files </code>: {files}"
-                msg += f"\n<code>Folder</code>: {folders}"
+                msg += f"\n{EM_12} <code>Files </code>: {files}"
+                msg += f"\n{EM_15} <code>Folder</code>: {folders}"
             if (
                 link
                 or rclonePath
@@ -719,10 +739,10 @@ class TaskListener(TaskConfig):
                 del task_dict[self.mid]
             count = len(task_dict)
         await self.remove_from_same_dir()
-        msg = f"Sorry {self.tag}!\nYour download has been stopped."
-        msg += f"\n\n<code>Reason </code>: {escape(str(error))}"
-        msg += f"\n<code>Past   </code>: {get_readable_time(time() - self.time)}"
-        msg += f"\n<code>Mode   </code>: {self.mode}"
+        msg = f"{EM_9} Sorry {self.tag}!\nYour download has been stopped."
+        msg += f"\n\n{EM_12} <code>Reason </code>: {escape(str(error))}"
+        msg += f"\n{EM_4} <code>Past   </code>: {get_readable_time(time() - self.time)}"
+        msg += f"\n{EM_17} <code>Mode   </code>: {self.mode}"
         tlmsg = await send_message(
             self.message, # type: ignore
             msg,
@@ -792,10 +812,10 @@ class TaskListener(TaskConfig):
             if self.mid in task_dict:
                 del task_dict[self.mid]
             count = len(task_dict)
-        msg = f"Sorry {self.tag}!\nYour upload has been stopped."
-        msg += f"\n\n<code>Reason </code>: {escape(str(error))}"
-        msg += f"\n<code>Past   </code>: {get_readable_time(time() - self.time)}"
-        msg += f"\n<code>Mode   </code>: {self.mode}"
+        msg = f"{EM_9} Sorry {self.tag}!\nYour upload has been stopped."
+        msg += f"\n\n{EM_12} <code>Reason </code>: {escape(str(error))}"
+        msg += f"\n{EM_4} <code>Past   </code>: {get_readable_time(time() - self.time)}"
+        msg += f"\n{EM_17} <code>Mode   </code>: {self.mode}"
         tlmsg = await send_message(
             self.message, # type: ignore
             msg
