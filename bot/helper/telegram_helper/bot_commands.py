@@ -100,6 +100,12 @@ class _BotCommands:
         self.RssCommand = f"rss{CMD_SUFFIX}"
         self.RmdbCommand = f"rmdb{CMD_SUFFIX}"
         self.RmalltokensCommand = f"rmat{CMD_SUFFIX}"
+        
+        # SpeedTest Command Integration
+        self.SpeedTestCommand = [
+            f"speedtest{CMD_SUFFIX}",
+            f"stest{CMD_SUFFIX}",
+        ]
 
 
 BotCommands = _BotCommands()
