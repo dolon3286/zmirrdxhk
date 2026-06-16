@@ -299,7 +299,7 @@ async def get_readable_message(
                 f"\n{EM_4} <b>Speed</b> → <i>{task.speed()}</i>"
                 f"\n{EM_5} <b>ETA</b> → <i>{task.eta()}</i>"
                 f"\n{EM_5} <b>Past</b> → <i>{elapsed}</i>"
-                f"\n👤 <b>User</b> → <b>{user_tag}</b>"
+                f"\n👤 <b>User</b> → <code>{user_tag}</code>"
                 f"\n🆔 <b>UserID</b> → ||{task.listener.user_id}||"
                 f"\n{EM_7} <b>Upload</b> → <i>{task.listener.mode}</i>"
                 f"\n{EM_13} <b>Engine</b> → <b><i>{task.engine}</i></b>"
@@ -335,7 +335,7 @@ async def get_readable_message(
                 f"\n{EM_6} <b>Size</b> → <i>{task.size()}</i>"
                 f"\n{EM_7} <b>Upload</b> → <i>{task.listener.mode}</i>"
                 f"\n{EM_5} <b>Past</b> → <i>{elapsed}</i>"
-                f"\n👤 <b>User</b> → <i>{user_tag}</i>"
+                f"\n👤 <b>User</b> → <code>{user_tag}</code>"
                 f"\n🆔 <b>UserID</b> → ||{task.listener.user_id}||"
                 f"\n{EM_13} <b>Engine</b> → <i>{task.engine}</i>"
             )
